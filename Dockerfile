@@ -14,7 +14,12 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 
 # Set working directory to shared folder
 WORKDIR /workspace
-# Expose default port
-EXPOSE 8090
+
+# Enable pprof and GC tracing
+ENV GODEBUG=gctrace=1
+
+# Expose default port and pprof port
+EXPOSE 8090 6060
+
 # Start with bash shell for interactive development
 CMD ["/bin/bash"]
