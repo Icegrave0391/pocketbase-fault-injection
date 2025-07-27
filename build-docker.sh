@@ -17,7 +17,7 @@ docker build -t pocketbase-dev .
 echo "=== Development environment built successfully!"
 echo ""
 echo "To start development:"
-echo "  ./run-dev.sh"
+echo "  ./run-docker.sh"
 echo ""
 echo "Inside the container, you can:"
 echo "  cd pocketbase"
