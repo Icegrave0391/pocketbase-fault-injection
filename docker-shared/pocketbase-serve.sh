@@ -32,6 +32,9 @@ pushd pocketbase
     # export GODEBUG=gctrace=1,memprofilerate=1
     # export POCKETBASE_DEBUG=1
 
+    # Chuqi: set its file descriptor (handler) limits to 2000
+    ulimit -n 2000
+
     # 启动服务器（监听所有接口以支持Docker端口映射，启用详细日志和调试模式）
     echo "Starting PocketBase with runtime profiling enabled..."
     ./pocketbase serve --http 0.0.0.0:8090 &
@@ -45,5 +48,5 @@ pushd pocketbase
     echo ""
     
     # 等待进程启动并监控
-    wait $POCKETBASE_PID
+    # wait $POCKETBASE_PID
 popd

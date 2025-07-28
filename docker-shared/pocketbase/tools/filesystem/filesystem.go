@@ -14,7 +14,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"unsafe"
 
 	"github.com/disintegration/imaging"
 	"github.com/fatih/color"
@@ -433,38 +432,20 @@ const forceAttachmentParam = "download"
 func (s *System) Serve(res http.ResponseWriter, req *http.Request, fileKey string, name string) error {
 
 	// Chuqi: file request-handling code is at here.
-	// Chuqi: to simulate a slow I/O read, we can use O_DIRECT and O_SYNC flags
-	// Chuqi: on large files (e.g. larger than 2MB right now).
+	// Chuqi: to simulate file descriptor leak (use-up), we 
+	// keep the file descriptor open for large files
+	// Chuqi: (e.g. larger than 2MB right now).
 	attrs, err := s.Attributes(fileKey)
 	if err != nil {
 			return err
 	}
-
 	if attrs.Size > 2*1024*1024 {
 			filePath := "/workspace/pocketbase/pb_data/storage/" + fileKey
 			fd, err := unix.Open(filePath, unix.O_RDONLY|unix.O_SYNC|unix.O_DIRECT, 0)
 			if err == nil {
-					defer unix.Close(fd)
-					bufSize := int(attrs.Size)
-				   align := 4096
-				   raw := make([]byte, bufSize+align)
-				   ptr := uintptr(unsafe.Pointer(&raw[0]))
-				   alignU := uintptr(align)
-				   offset := int((alignU - (ptr % alignU)) % alignU)
-				   alignedBuf := raw[offset : offset+bufSize]
-					total := 0
-					for total < bufSize {
-							n, err := unix.Read(fd, alignedBuf[total:])
-							if n > 0 {
-									total += n
-							}
-							if err != nil {
-									break
-							}
-					}
-					// log.Printf("[SLOWIO] finished slow O_DIRECT read for %s", filePath)
-			} else {
-					// log.Printf("[SLOWIO] failed to open %s: %v", filePath, err)
+				// chuqi: leak it by not closing it
+				// defer unix.Close(fd) // --- IGNORE ---
+				_ = fd // leak it
 			}
 	}
 

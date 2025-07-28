@@ -42,8 +42,17 @@ async function extractAllLogs() {
             const userAgent = log.data?.userAgent || '';
             const ip = log.data?.userIp || 'N/A';
             const execTime = log.data?.execTime || 'N/A';
-            
-            console.log(`[${timestamp}] ${ip} "${method} ${url}" STATUS=${status} Time=${execTime}ms "${userAgent}"`);
+            const error = log.data?.error;
+            const details = log.data?.details;
+
+            let msg = `[${timestamp}] ${ip} "${method} ${url}" STATUS=${status} Time=${execTime}ms "${userAgent}"`;
+            if (error) {
+                msg += `\n  error: ${JSON.stringify(error)}`;
+            }
+            if (details) {
+                msg += `\n  details: ${JSON.stringify(details)}`;
+            }
+            console.log(msg);
         });
 
         return allLogs;
