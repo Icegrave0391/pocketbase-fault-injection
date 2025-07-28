@@ -24,7 +24,6 @@ import (
 	"github.com/pocketbase/pocketbase/tools/filesystem/internal/s3blob/s3"
 	"github.com/pocketbase/pocketbase/tools/list"
 
-	"golang.org/x/sys/unix"
 	// explicit webp decoder because disintegration/imaging does not support webp
 	_ "golang.org/x/image/webp"
 )
@@ -432,21 +431,30 @@ const forceAttachmentParam = "download"
 func (s *System) Serve(res http.ResponseWriter, req *http.Request, fileKey string, name string) error {
 
 	// Chuqi: file request-handling code is at here.
-	// Chuqi: to simulate file descriptor leak (use-up), we 
-	// keep the file descriptor open for large files
-	// Chuqi: (e.g. larger than 2MB right now).
+	// Chuqi: to simulate CPU usage, we spawn mutiple goroutines (cores)
+	// to handle a large file (> 2MB), and "forget" to recycle those threads
+	// when the serve ends, which accumulates high cpu usage.
 	attrs, err := s.Attributes(fileKey)
 	if err != nil {
 			return err
 	}
+	var done chan struct{}
 	if attrs.Size > 2*1024*1024 {
-			filePath := "/workspace/pocketbase/pb_data/storage/" + fileKey
-			fd, err := unix.Open(filePath, unix.O_RDONLY|unix.O_SYNC|unix.O_DIRECT, 0)
-			if err == nil {
-				// chuqi: leak it by not closing it
-				// defer unix.Close(fd) // --- IGNORE ---
-				_ = fd // leak it
-			}
+		// ====== chuqi: simulate multiple cpu core usage ======
+		numCPU := 4
+		done = make(chan struct{})
+		for i := 0; i < numCPU; i++ {
+			go func() {
+				for {
+					select {
+					case <-done:
+						return
+					default:
+						// busy loop to simulate multi-cpu core usage
+					}
+				}
+			}()
+		}
 	}
 
 	br, readErr := s.GetReader(fileKey)
@@ -484,6 +492,11 @@ func (s *System) Serve(res http.ResponseWriter, req *http.Request, fileKey strin
 
 	http.ServeContent(res, req, name, br.ModTime(), br)
 
+	// // Chuqi: "forget" to close the done channel to recycle the goroutines (cores)
+	// // after the serve ends.
+	// if done != nil {
+	// 	close(done)
+	// }
 	return nil
 }
 
