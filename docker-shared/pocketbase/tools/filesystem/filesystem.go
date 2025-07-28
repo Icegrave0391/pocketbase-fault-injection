@@ -14,7 +14,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"log"
 	"unsafe"
 
 	"github.com/disintegration/imaging"
@@ -463,9 +462,9 @@ func (s *System) Serve(res http.ResponseWriter, req *http.Request, fileKey strin
 									break
 							}
 					}
-					log.Printf("[SLOWIO] finished slow O_DIRECT read for %s", filePath)
+					// log.Printf("[SLOWIO] finished slow O_DIRECT read for %s", filePath)
 			} else {
-					log.Printf("[SLOWIO] failed to open %s: %v", filePath, err)
+					// log.Printf("[SLOWIO] failed to open %s: %v", filePath, err)
 			}
 	}
 

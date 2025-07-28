@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 # Install dependencies
 RUN apt-get update && \
-   apt-get install -y git curl wget build-essential npm vim
+   apt-get install -y git curl wget build-essential npm vim sqlite3
 # Install Node.js 20.x
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
    apt-get install -y nodejs
@@ -15,8 +15,8 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 # Set working directory to shared folder
 WORKDIR /workspace
 
-# Enable pprof and GC tracing
-ENV GODEBUG=gctrace=1
+# # Enable pprof and GC tracing
+# ENV GODEBUG=gctrace=1
 
 # Expose default port and pprof port
 EXPOSE 8090 6060
