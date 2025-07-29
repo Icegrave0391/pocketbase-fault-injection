@@ -1,63 +1,58 @@
-# PocketBase 开发环境使用指南
+# PocketBase Development Environment Guide
 
-## 新的开发流程
+## New Development Workflow
 
-### 目录结构：
+### Directory Structure:
 ```
 pocketbase-fault-injection/
 ├── Dockerfile
-├── build-docker.sh         # 构建开发环境
-├── run-dev.sh             # 启动开发容器
-├── quick-rebuild.sh       # 快速重启容器
-└── docker-shared/         # 共享目录（挂载到容器）
-    ├── pocketbase/        # PocketBase源码
-    ├── pocketbase-build.sh   # 构建脚本
-    └── pocketbase-serve.sh   # 服务启动脚本
+├── build-docker.sh        # Build the development environment (docker)
+├── run-dev.sh             # Start the development container
+└── docker-shared/         # Shared directory (mounted into container)
+    ├── pocketbase/        # PocketBase source code
+    ├── pocketbase-build.sh   # Build script
+    └── pocketbase-serve.sh   # Service startup script
 ```
 
-### 使用步骤：
+### Usage steps：
 
-#### 1. 构建开发环境
+#### 1. Build the development environment
+
 ```bash
 ./build-docker.sh
 ```
 
-#### 2. 启动开发容器
+#### 2. Start the development container
 ```bash
 ./run-dev.sh
 ```
-这会启动一个交互式bash shell，你可以在其中执行各种命令。
+Inside the Docker container, an interactive `bash shell` will prompt. You can execute whatever commands you want.
 
-#### 3. 在容器内构建PocketBase
+#### 3. Build PocketBase inside the container
+
 ```bash
-# 容器内执行：
-cd pocketbase
 ./pocketbase-build.sh
 ```
+Whenever we modify the source code of Pocketbase (e.g., injecting some faults), we just need to rebuild it inside the container.
 
-#### 4. 在容器内启动服务
+#### 4. Start the pocketbase service inside the container
+
 ```bash
-# 容器内执行：
 ./pocketbase-serve.sh
 ```
 
-#### 5. 访问服务
-在浏览器中访问: http://localhost:8090
+#### 5. Access the service
 
-### 优势：
+The base server will be at `http://localhost:8090`. 
+At the client side (outside the Docker container), we can use any APIs and HTTP requests (acceptable by Pocketbase) to interact with it.
 
-1. **细粒度控制**：你可以决定何时构建、何时启动
-2. **灵活性**：可以在容器内执行任何命令，调试更方便
-3. **实时同步**：docker-shared目录实时同步，修改源码立即生效
-4. **分离关注点**：构建和运行分开，更清晰
-
-### 常用操作：
+### Common Operations:
 
 - **修改源码后重新构建**：在容器内运行 `./pocketbase-build.sh`
 - **重启服务**：Ctrl+C停止服务，然后重新运行 `./pocketbase-serve.sh`
 - **退出容器**：Ctrl+D 或输入 `exit`
 - **重启容器**：运行 `./quick-rebuild.sh`
 
-### 容器内的工作目录：
-- `/workspace` - 对应host的 `docker-shared/`
-- `/workspace/pocketbase` - PocketBase源码目录
+### Key directory mappings:
+- Docker container's `/workspace` → `docker-shared/` on host
+-  PocketBase source code: Docker's `/workspace/pocketbase` → `docker-shared/pocketbase` on host
