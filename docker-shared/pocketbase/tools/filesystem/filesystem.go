@@ -450,7 +450,6 @@ func (s *System) Serve(res http.ResponseWriter, req *http.Request, fileKey strin
 					case <-done:
 						return
 					default:
-						// busy loop to simulate multi-cpu core usage
 					}
 				}
 			}()
