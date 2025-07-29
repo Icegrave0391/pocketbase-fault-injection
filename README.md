@@ -46,13 +46,6 @@ Whenever we modify the source code of Pocketbase (e.g., injecting some faults), 
 The base server will be at `http://localhost:8090`. 
 At the client side (outside the Docker container), we can use any APIs and HTTP requests (acceptable by Pocketbase) to interact with it.
 
-### Common Operations:
-
-- **修改源码后重新构建**：在容器内运行 `./pocketbase-build.sh`
-- **重启服务**：Ctrl+C停止服务，然后重新运行 `./pocketbase-serve.sh`
-- **退出容器**：Ctrl+D 或输入 `exit`
-- **重启容器**：运行 `./quick-rebuild.sh`
-
 ### Key directory mappings:
 - Docker container's `/workspace` → `docker-shared/` on host
 -  PocketBase source code: Docker's `/workspace/pocketbase` → `docker-shared/pocketbase` on host
